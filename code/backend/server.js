@@ -28,6 +28,11 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'ITQAN Backend API is running' });
 });
 
+// Add a root route so the browser doesn't show "Cannot GET /"
+app.get('/', (req, res) => {
+    res.send('Welcome to the ITQAN Backend API. Please use the /api routes.');
+});
+
 const PORT = process.env.PORT || 8080;
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
