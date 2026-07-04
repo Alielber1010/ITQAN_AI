@@ -2,13 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
+import AddIcon from '@mui/icons-material/Add';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 export default function Chatbot() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [messages, setMessages] = useState([
-    { sender: 'ai', text: t('chatbot.welcome') }
-  ]);
+  const [sessions, setSessions] = useState([]);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const endRef = useRef(null);
@@ -19,9 +21,95 @@ export default function Chatbot() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Fetch all sessions on mount
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  // Fetch messages when session changes
+  useEffect(() => {
+    if (currentSessionId) {
+      fetchMessages(currentSessionId);
+    } else {
+      setMessages([{ sender: 'ai', text: t('chatbot.welcome') || 'Assalamu alaikum! How can I help you with Islamic Finance today?' }]);
+    }
+  }, [currentSessionId]);
+
+  const fetchSessions = async () => {
+    try {
+      const token = localStorage.getItem('itqan_token');
+      const res = await fetch(`${API_URL}/api/ai/sessions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSessions(data.sessions);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sessions", err);
+    }
+  };
+
+  const fetchMessages = async (sessionId) => {
+    try {
+      const token = localStorage.getItem('itqan_token');
+      const res = await fetch(`${API_URL}/api/ai/sessions/${sessionId}/messages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && data.messages.length > 0) {
+        setMessages(data.messages);
+      } else {
+        setMessages([{ sender: 'ai', text: t('chatbot.welcome') || 'Assalamu alaikum! How can I help you with Islamic Finance today?' }]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
+    }
+  };
+
+  const createNewSession = async () => {
+    try {
+      const token = localStorage.getItem('itqan_token');
+      const res = await fetch(`${API_URL}/api/ai/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ title: 'New Chat' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSessions([data.session, ...sessions]);
+        setCurrentSessionId(data.session.session_id);
+      }
+    } catch (err) {
+      console.error("Failed to create session", err);
+    }
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
     if(!input.trim()) return;
+
+    // If no session exists yet, create one automatically
+    let activeSessionId = currentSessionId;
+    if (!activeSessionId) {
+      try {
+        const token = localStorage.getItem('itqan_token');
+        const res = await fetch(`${API_URL}/api/ai/sessions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ title: 'New Chat' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          activeSessionId = data.session.session_id;
+          setSessions([data.session, ...sessions]);
+          setCurrentSessionId(activeSessionId);
+        }
+      } catch (err) {
+        console.error("Failed to create auto session", err);
+        return;
+      }
+    }
 
     setMessages(prev => [...prev, { sender: 'user', text: input }]);
     setInput('');
@@ -35,24 +123,61 @@ export default function Chatbot() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ message: input, history: messages, userId: user.uid })
+        body: JSON.stringify({ message: input, history: messages, userId: user.uid, sessionId: activeSessionId })
       });
       const data = await res.json();
       setMessages(prev => [...prev, { sender: 'ai', text: data.reply || data.message }]);
+      
+      // Refresh sessions to get updated title/timestamp
+      fetchSessions();
     } catch (err) {
-      setMessages(prev => [...prev, { sender: 'ai', text: t('chatbot.error') }]);
+      setMessages(prev => [...prev, { sender: 'ai', text: t('chatbot.error') || 'Error fetching response' }]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
-      <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>{t('chatbot.title')}</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>{t('chatbot.subtitle')}</p>
-      
-      <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 80px)', gap: '24px' }}>
+      {/* Sidebar for Sessions */}
+      <div className="glass-panel" style={{ width: '260px', display: 'flex', flexDirection: 'column', padding: '16px' }}>
+        <button 
+          onClick={createNewSession}
+          className="btn btn-primary" 
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}
+        >
+          <AddIcon /> {t('chatbot.newChat') || 'New Chat'}
+        </button>
         
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {sessions.map(session => (
+            <div 
+              key={session.session_id}
+              onClick={() => setCurrentSessionId(session.session_id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: currentSessionId === session.session_id ? 'var(--primary-color)' : 'transparent',
+                color: currentSessionId === session.session_id ? 'white' : 'var(--text-main)',
+                transition: 'background 0.2s',
+              }}
+              className={currentSessionId !== session.session_id ? "hover-surface" : ""}
+            >
+              <ChatBubbleOutlineIcon fontSize="small" />
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px' }}>
+                {session.title}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
         {/* Chat History View */}
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {messages.map((msg, i) => (
@@ -77,7 +202,7 @@ export default function Chatbot() {
           {isLoading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--surface)', color: 'var(--text-muted)' }}>
-                {t('chatbot.typing')}
+                {t('chatbot.typing') || 'Typing...'}
               </div>
             </div>
           )}
@@ -91,11 +216,11 @@ export default function Chatbot() {
               type="text" 
               className="input-field" 
               style={{ margin: 0, flex: 1 }} 
-              placeholder={t('chatbot.placeholder')}
+              placeholder={t('chatbot.placeholder') || 'Type a message...'}
               value={input} 
               onChange={e => setInput(e.target.value)}
             />
-            <button className="btn btn-primary" type="submit" disabled={isLoading}>{t('chatbot.send')}</button>
+            <button className="btn btn-primary" type="submit" disabled={isLoading}>{t('chatbot.send') || 'Send'}</button>
           </form>
         </div>
       </div>

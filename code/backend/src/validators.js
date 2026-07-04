@@ -51,6 +51,7 @@ const chatSchema = Joi.object({
     text: Joi.string().required(),
   })).optional(),
   userId: Joi.string().allow(null, '').optional(),
+  sessionId: Joi.string().allow(null, '').optional(),
 });
 
 // ── Shariah Schemas ───────────────────────────────────────────

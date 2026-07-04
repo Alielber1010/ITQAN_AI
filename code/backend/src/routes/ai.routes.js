@@ -7,13 +7,87 @@ const { chatSchema } = require('../validators');
 const { queryRAG } = require('../rag');
 
 /**
+ * GET /api/ai/sessions
+ * Get all chat sessions for a user
+ */
+router.get('/sessions', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const result = await db.query(
+      'SELECT * FROM chat_sessions WHERE user_id = $1 ORDER BY updated_date DESC',
+      [uid]
+    );
+    res.json({ success: true, sessions: result.rows });
+  } catch (error) {
+    console.error('Error fetching sessions:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+/**
+ * POST /api/ai/sessions
+ * Create a new chat session
+ */
+router.post('/sessions', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const title = req.body.title || 'New Chat';
+    const result = await db.query(
+      'INSERT INTO chat_sessions (user_id, title) VALUES ($1, $2) RETURNING *',
+      [uid, title]
+    );
+    res.json({ success: true, session: result.rows[0] });
+  } catch (error) {
+    console.error('Error creating session:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+/**
+ * GET /api/ai/sessions/:sessionId/messages
+ * Get all messages for a session
+ */
+router.get('/sessions/:sessionId/messages', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const { sessionId } = req.params;
+    
+    const sessionRes = await db.query('SELECT user_id FROM chat_sessions WHERE session_id = $1', [sessionId]);
+    if (sessionRes.rows.length === 0 || sessionRes.rows[0].user_id !== uid) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const messagesRes = await db.query(
+      'SELECT sender, text, created_date FROM chat_messages WHERE session_id = $1 ORDER BY created_date ASC',
+      [sessionId]
+    );
+    res.json({ success: true, messages: messagesRes.rows });
+  } catch (error) {
+    console.error('Error fetching messages:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+/**
  * POST /api/ai/chat
  * AI chatbot endpoint. Uses Groq LLM + RAG (ChromaDB) to provide
  * Shariah-compliant financial advice grounded in the actual PDF content.
  * Persists the advice record in PostgreSQL.
  */
 router.post('/chat', authMiddleware, validate(chatSchema), async (req, res) => {
-  const { message, history, userId } = req.body;
+  const { message, history, userId, sessionId } = req.body;
+
+  // ── 0. Save user message to chat_messages if session exists ──
+  if (sessionId) {
+    try {
+      await db.query(
+        'INSERT INTO chat_messages (session_id, sender, text) VALUES ($1, $2, $3)',
+        [sessionId, 'user', message]
+      );
+    } catch(err) {
+      console.error('Failed to save user message:', err.message);
+    }
+  }
 
   // ── 1. Fetch user's financial profile from PostgreSQL ──
   let userProfileText = "No financial profile available.";
@@ -149,6 +223,27 @@ Always speak with immense respect and professionalism. Use Islamic greetings lik
       );
     } catch (error) {
       console.error('Failed to store advice in DB:', error.message);
+    }
+  }
+
+  // ── 8. Save AI message to chat_messages and update session ──
+  if (sessionId) {
+    try {
+      await db.query(
+        'INSERT INTO chat_messages (session_id, sender, text) VALUES ($1, $2, $3)',
+        [sessionId, 'ai', responseText]
+      );
+      
+      // Update session title if it's new
+      const titleRes = await db.query('SELECT title FROM chat_sessions WHERE session_id = $1', [sessionId]);
+      if (titleRes.rows.length > 0 && titleRes.rows[0].title === 'New Chat') {
+         const generatedTitle = message.length > 30 ? message.substring(0, 30) + '...' : message;
+         await db.query('UPDATE chat_sessions SET title = $1, updated_date = NOW() WHERE session_id = $2', [generatedTitle, sessionId]);
+      } else {
+         await db.query('UPDATE chat_sessions SET updated_date = NOW() WHERE session_id = $1', [sessionId]);
+      }
+    } catch(err) {
+      console.error('Failed to save AI message:', err.message);
     }
   }
 
