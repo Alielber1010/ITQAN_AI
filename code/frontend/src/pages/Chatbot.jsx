@@ -138,9 +138,9 @@ export default function Chatbot() {
   };
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 80px)', gap: '24px' }}>
+    <div className="chat-layout">
       {/* Sidebar for Sessions */}
-      <div className="glass-panel" style={{ width: '260px', display: 'flex', flexDirection: 'column', padding: '16px' }}>
+      <div className="glass-panel chat-sidebar">
         <button 
           onClick={createNewSession}
           className="btn btn-primary" 
@@ -177,7 +177,7 @@ export default function Chatbot() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+      <div className="glass-panel chat-main">
         {/* Chat History View */}
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {messages.map((msg, i) => (
