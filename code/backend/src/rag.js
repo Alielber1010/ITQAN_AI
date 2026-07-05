@@ -1,51 +1,30 @@
 /**
  * RAG (Retrieval-Augmented Generation) Module
- * 
- * Handles PDF text extraction, chunking, and ChromaDB vector storage/retrieval.
- * Used to ground the AI chatbot's responses in the actual Shariah PDF content.
+ *
+ * Handles PDF text extraction, chunking, and pgvector-backed embedding
+ * storage/retrieval. Used to ground the AI chatbot's responses in the
+ * actual Shariah PDF content.
  */
 const path = require('path');
 const fs = require('fs');
-const { ChromaClient } = require('chromadb');
+const { DefaultEmbeddingFunction } = require('@chroma-core/default-embed');
+const db = require('./db');
 
-const COLLECTION_NAME = 'shariah_knowledge';
-const CHROMA_PATH = path.resolve(__dirname, '../../chroma_data');
-
-let client = null;
-let collection = null;
+let embedder = null;
 
 /**
- * Initialize ChromaDB client (persistent local storage)
+ * Lazily construct the local embedding model (Xenova/all-MiniLM-L6-v2, 384 dims).
+ * Runs in-process via ONNX — no external service required.
  */
-async function getClient() {
-  if (!client) {
-    const chromaUrl = process.env.CHROMA_DB_URL || 'http://localhost:8000';
-    try {
-      const parsedUrl = new URL(chromaUrl);
-      client = new ChromaClient({
-        host: parsedUrl.hostname,
-        port: parseInt(parsedUrl.port || (parsedUrl.protocol === 'https:' ? '443' : '80'), 10),
-        ssl: parsedUrl.protocol === 'https:'
-      });
-    } catch (e) {
-      console.warn("Invalid CHROMA_DB_URL, falling back to defaults", e);
-      client = new ChromaClient({ host: 'localhost', port: 8000, ssl: false });
-    }
+function getEmbedder() {
+  if (!embedder) {
+    embedder = new DefaultEmbeddingFunction();
   }
-  return client;
+  return embedder;
 }
 
-/**
- * Get or create the Shariah knowledge collection
- */
-async function getCollection() {
-  if (collection) return collection;
-  const c = await getClient();
-  collection = await c.getOrCreateCollection({
-    name: COLLECTION_NAME,
-    metadata: { description: 'Shariah law PDF chunks for RAG' },
-  });
-  return collection;
+function toVectorLiteral(embedding) {
+  return `[${embedding.join(',')}]`;
 }
 
 /**
@@ -93,18 +72,16 @@ function chunkText(text, chunkSize = 2000, overlap = 200) {
 }
 
 /**
- * Ingest a PDF into the ChromaDB collection
+ * Ingest a PDF into the shariah_chunks pgvector table
  */
 async function ingestPDF(pdfPath) {
   console.log(`[RAG] Starting PDF ingestion: ${pdfPath}`);
 
-  const col = await getCollection();
-
-  // Check if already ingested
-  const count = await col.count();
-  if (count > 0) {
-    console.log(`[RAG] Collection already has ${count} chunks. Skipping ingestion.`);
-    return count;
+  const countRes = await db.query('SELECT COUNT(*)::int AS count FROM shariah_chunks');
+  const existingCount = countRes.rows[0].count;
+  if (existingCount > 0) {
+    console.log(`[RAG] Table already has ${existingCount} chunks. Skipping ingestion.`);
+    return existingCount;
   }
 
   // Extract and chunk
@@ -114,56 +91,59 @@ async function ingestPDF(pdfPath) {
   const chunks = chunkText(text);
   console.log(`[RAG] Created ${chunks.length} chunks.`);
 
-  // Add chunks to ChromaDB in batches
+  const source = path.basename(pdfPath);
+  const fn = getEmbedder();
+
+  // Embed and insert in batches
   const batchSize = 50;
   for (let i = 0; i < chunks.length; i += batchSize) {
     const batch = chunks.slice(i, i + batchSize);
-    const ids = batch.map((_, idx) => `chunk-${i + idx}`);
-    const metadatas = batch.map((_, idx) => ({
-      source: path.basename(pdfPath),
-      chunkIndex: i + idx,
-    }));
+    const embeddings = await fn.generate(batch);
 
-    await col.add({
-      ids,
-      documents: batch,
-      metadatas,
-    });
+    for (let j = 0; j < batch.length; j++) {
+      await db.query(
+        `INSERT INTO shariah_chunks (source, chunk_index, content, embedding)
+         VALUES ($1, $2, $3, $4::vector)`,
+        [source, i + j, batch[j], toVectorLiteral(embeddings[j])]
+      );
+    }
 
     console.log(`[RAG] Ingested batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(chunks.length / batchSize)}`);
   }
 
-  const finalCount = await col.count();
-  console.log(`[RAG] Ingestion complete. Total chunks in collection: ${finalCount}`);
+  const finalRes = await db.query('SELECT COUNT(*)::int AS count FROM shariah_chunks');
+  const finalCount = finalRes.rows[0].count;
+  console.log(`[RAG] Ingestion complete. Total chunks in table: ${finalCount}`);
   return finalCount;
 }
 
 /**
- * Query the ChromaDB collection for relevant passages
+ * Query the shariah_chunks table for relevant passages via cosine similarity
  * @param {string} question - User's question
  * @param {number} topK - Number of results to return
  * @returns {Array<string>} - Relevant text passages
  */
 async function queryRAG(question, topK = 5) {
   try {
-    const col = await getCollection();
-    const count = await col.count();
-    
+    const countRes = await db.query('SELECT COUNT(*)::int AS count FROM shariah_chunks');
+    const count = countRes.rows[0].count;
+
     if (count === 0) {
-      console.log('[RAG] Collection is empty. Run ingest.js first.');
+      console.log('[RAG] Table is empty. Run ingest.js first.');
       return [];
     }
 
-    const results = await col.query({
-      queryTexts: [question],
-      nResults: Math.min(topK, count),
-    });
+    const fn = getEmbedder();
+    const [queryEmbedding] = await fn.generate([question]);
 
-    if (results && results.documents && results.documents[0]) {
-      return results.documents[0];
-    }
+    const result = await db.query(
+      `SELECT content FROM shariah_chunks
+       ORDER BY embedding <=> $1::vector
+       LIMIT $2`,
+      [toVectorLiteral(queryEmbedding), Math.min(topK, count)]
+    );
 
-    return [];
+    return result.rows.map((r) => r.content);
   } catch (error) {
     console.error('[RAG] Query error:', error.message);
     return [];
@@ -173,7 +153,6 @@ async function queryRAG(question, topK = 5) {
 module.exports = {
   ingestPDF,
   queryRAG,
-  getCollection,
   extractTextFromPDF,
   chunkText,
 };
