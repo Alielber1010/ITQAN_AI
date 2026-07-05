@@ -149,11 +149,52 @@ ${ragContext}
 TONE:
 Always speak with immense respect and professionalism. Use Islamic greetings like "Assalamu alaikum" when appropriate. Do not preach, but explain financial rules clearly and logically. Use bullet points and bold text to make your advice readable. Keep answers structured and actionable.`;
 
-  // ── 5. Call Groq API ──
+  // ── 5. Call the LLM ──
   let responseText = "";
   const groqApiKey = process.env.GROQ_API_KEY;
+  // TEMP: stand-in for GROQ_API_KEY while we don't have one yet. Swap this
+  // whole Gemini branch out once a real GROQ_API_KEY is set — see the Groq
+  // branch below for the intended long-term path.
+  const googleApiKey = process.env.GOOGLE_API_KEY;
 
-  if (groqApiKey && groqApiKey !== 'your_groq_api_key_here') {
+  if (googleApiKey) {
+    try {
+      const geminiContents = [];
+      if (history && Array.isArray(history)) {
+        history.forEach(msg => {
+          geminiContents.push({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.text }],
+          });
+        });
+      }
+      geminiContents.push({ role: 'user', parts: [{ text: message }] });
+
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${googleApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: geminiContents,
+            systemInstruction: { parts: [{ text: systemInstructionText }] },
+            generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+          }),
+        }
+      );
+
+      const geminiData = await geminiRes.json();
+      const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        responseText = text;
+      } else {
+        console.error("Gemini API Error:", JSON.stringify(geminiData, null, 2));
+        throw new Error('Invalid Gemini API response structure');
+      }
+    } catch (error) {
+      console.error('Gemini API call failed, falling back to mock rules:', error.message);
+    }
+  } else if (groqApiKey && groqApiKey !== 'your_groq_api_key_here') {
     try {
       const contents = [];
       if (history && Array.isArray(history)) {
