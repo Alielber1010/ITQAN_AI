@@ -153,46 +153,50 @@ Always speak with immense respect and professionalism. Use Islamic greetings lik
   let responseText = "";
   const groqApiKey = process.env.GROQ_API_KEY;
   // TEMP: stand-in for GROQ_API_KEY while we don't have one yet. Swap this
-  // whole Gemini branch out once a real GROQ_API_KEY is set — see the Groq
-  // branch below for the intended long-term path.
-  const googleApiKey = process.env.GOOGLE_API_KEY;
+  // whole OpenRouter branch out once a real GROQ_API_KEY is set — see the
+  // Groq branch below for the intended long-term path.
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
-  if (googleApiKey) {
+  if (openRouterApiKey) {
     try {
-      const geminiContents = [];
+      const orContents = [];
       if (history && Array.isArray(history)) {
         history.forEach(msg => {
-          geminiContents.push({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }],
+          orContents.push({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text,
           });
         });
       }
-      geminiContents.push({ role: 'user', parts: [{ text: message }] });
+      orContents.push({ role: 'user', content: message });
 
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${googleApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: geminiContents,
-            systemInstruction: { parts: [{ text: systemInstructionText }] },
-            generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
-          }),
-        }
-      );
+      const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openRouterApiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-3.3-70b-instruct',
+          messages: [
+            { role: 'system', content: systemInstructionText },
+            ...orContents,
+          ],
+          temperature: 0.3,
+          max_tokens: 2048,
+        }),
+      });
 
-      const geminiData = await geminiRes.json();
-      const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const orData = await orRes.json();
+      const text = orData?.choices?.[0]?.message?.content;
       if (text) {
         responseText = text;
       } else {
-        console.error("Gemini API Error:", JSON.stringify(geminiData, null, 2));
-        throw new Error('Invalid Gemini API response structure');
+        console.error("OpenRouter API Error:", JSON.stringify(orData, null, 2));
+        throw new Error('Invalid OpenRouter API response structure');
       }
     } catch (error) {
-      console.error('Gemini API call failed, falling back to mock rules:', error.message);
+      console.error('OpenRouter API call failed, falling back to mock rules:', error.message);
     }
   } else if (groqApiKey && groqApiKey !== 'your_groq_api_key_here') {
     try {

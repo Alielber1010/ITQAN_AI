@@ -12,19 +12,22 @@ const { env: transformersEnv } = require('@huggingface/transformers');
 const { DefaultEmbeddingFunction } = require('@chroma-core/default-embed');
 const db = require('./db');
 
-// Vercel's serverless filesystem is read-only outside /tmp, but transformers.js
-// defaults to caching the downloaded model under node_modules. Redirect it.
-transformersEnv.cacheDir = path.join(os.tmpdir(), 'transformers-cache');
+// The model is vendored under ./models (quantized, ~22MB) and read directly from
+// the deployment bundle. Downloading it at request time was unreliable on Vercel's
+// serverless filesystem (read-only outside /tmp, and downloads got truncated/corrupted
+// there), so remote fetching is disabled entirely.
+transformersEnv.localModelPath = path.resolve(__dirname, '../models');
+transformersEnv.allowRemoteModels = false;
 
 let embedder = null;
 
 /**
- * Lazily construct the local embedding model (Xenova/all-MiniLM-L6-v2, 384 dims).
- * Runs in-process via ONNX — no external service required.
+ * Lazily construct the local embedding model (Xenova/all-MiniLM-L6-v2, 384 dims,
+ * q8 quantized). Runs in-process via ONNX — no external service or network required.
  */
 function getEmbedder() {
   if (!embedder) {
-    embedder = new DefaultEmbeddingFunction();
+    embedder = new DefaultEmbeddingFunction({ dtype: 'q8' });
   }
   return embedder;
 }
