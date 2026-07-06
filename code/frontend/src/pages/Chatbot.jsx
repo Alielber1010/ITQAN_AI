@@ -99,7 +99,8 @@ export default function Chatbot() {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if(!input.trim()) return;
+    if (!input.trim() || isLoading) return;
+    setIsLoading(true);
 
     // If no session exists yet, create one automatically
     let activeSessionId = currentSessionId;
@@ -119,13 +120,13 @@ export default function Chatbot() {
         }
       } catch (err) {
         console.error("Failed to create auto session", err);
+        setIsLoading(false);
         return;
       }
     }
 
     setMessages(prev => [...prev, { sender: 'user', text: input }]);
     setInput('');
-    setIsLoading(true);
 
     try {
       const token = localStorage.getItem('itqan_token');
