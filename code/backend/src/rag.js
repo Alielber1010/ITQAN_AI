@@ -31,10 +31,12 @@ function toVectorLiteral(embedding) {
  * Extract text from a PDF file
  */
 async function extractTextFromPDF(pdfPath) {
-  const pdfParse = require('pdf-parse');
+  const { PDFParse } = require('pdf-parse');
   const dataBuffer = fs.readFileSync(pdfPath);
-  const data = await pdfParse(dataBuffer);
-  return data.text;
+  const parser = new PDFParse({ data: dataBuffer });
+  const result = await parser.getText();
+  await parser.destroy();
+  return result.text;
 }
 
 /**
