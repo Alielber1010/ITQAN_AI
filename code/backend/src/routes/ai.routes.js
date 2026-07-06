@@ -150,55 +150,15 @@ TONE:
 Always speak with immense respect and professionalism. Use Islamic greetings like "Assalamu alaikum" when appropriate. Do not preach, but explain financial rules clearly and logically. Use bullet points and bold text to make your advice readable. Keep answers structured and actionable.`;
 
   // ── 5. Call the LLM ──
+  // Groq is the intended long-term provider and always wins when a real key
+  // is set. OpenRouter is a TEMP stand-in used only while GROQ_API_KEY is
+  // absent — once GROQ_API_KEY is set, this branch stops running on its own,
+  // no code changes needed.
   let responseText = "";
   const groqApiKey = process.env.GROQ_API_KEY;
-  // TEMP: stand-in for GROQ_API_KEY while we don't have one yet. Swap this
-  // whole OpenRouter branch out once a real GROQ_API_KEY is set — see the
-  // Groq branch below for the intended long-term path.
   const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
-  if (openRouterApiKey) {
-    try {
-      const orContents = [];
-      if (history && Array.isArray(history)) {
-        history.forEach(msg => {
-          orContents.push({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
-            content: msg.text,
-          });
-        });
-      }
-      orContents.push({ role: 'user', content: message });
-
-      const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openRouterApiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct',
-          messages: [
-            { role: 'system', content: systemInstructionText },
-            ...orContents,
-          ],
-          temperature: 0.3,
-          max_tokens: 2048,
-        }),
-      });
-
-      const orData = await orRes.json();
-      const text = orData?.choices?.[0]?.message?.content;
-      if (text) {
-        responseText = text;
-      } else {
-        console.error("OpenRouter API Error:", JSON.stringify(orData, null, 2));
-        throw new Error('Invalid OpenRouter API response structure');
-      }
-    } catch (error) {
-      console.error('OpenRouter API call failed, falling back to mock rules:', error.message);
-    }
-  } else if (groqApiKey && groqApiKey !== 'your_groq_api_key_here') {
+  if (groqApiKey && groqApiKey !== 'your_groq_api_key_here') {
     try {
       const contents = [];
       if (history && Array.isArray(history)) {
@@ -241,9 +201,50 @@ Always speak with immense respect and professionalism. Use Islamic greetings lik
     } catch (error) {
       console.error('Groq API call failed, falling back to mock rules:', error.message);
     }
+  } else if (openRouterApiKey) {
+    try {
+      const orContents = [];
+      if (history && Array.isArray(history)) {
+        history.forEach(msg => {
+          orContents.push({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text,
+          });
+        });
+      }
+      orContents.push({ role: 'user', content: message });
+
+      const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openRouterApiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-3.3-70b-instruct',
+          messages: [
+            { role: 'system', content: systemInstructionText },
+            ...orContents,
+          ],
+          temperature: 0.3,
+          max_tokens: 2048,
+        }),
+      });
+
+      const orData = await orRes.json();
+      const text = orData?.choices?.[0]?.message?.content;
+      if (text) {
+        responseText = text;
+      } else {
+        console.error("OpenRouter API Error:", JSON.stringify(orData, null, 2));
+        throw new Error('Invalid OpenRouter API response structure');
+      }
+    } catch (error) {
+      console.error('OpenRouter API call failed, falling back to mock rules:', error.message);
+    }
   }
 
-  // ── 6. Fallback engine if Groq is not configured or fails ──
+  // ── 6. Fallback engine if no provider is configured or the call fails ──
   if (!responseText) {
     await new Promise(resolve => setTimeout(resolve, 800));
 

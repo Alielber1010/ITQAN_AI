@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
-const { registerSchema, loginSchema, verifyMfaSchema } = require('../validators');
+const { registerSchema, loginSchema } = require('../validators');
 
 /**
  * POST /api/auth/register
@@ -13,15 +13,9 @@ router.post('/register', validate(registerSchema), authController.signup);
 
 /**
  * POST /api/auth/login
- * Handles user login (Step 1 — credentials, issues MFA challenge).
+ * Handles user login — validates credentials and issues a JWT.
  */
 router.post('/login', validate(loginSchema), authController.login);
-
-/**
- * POST /api/auth/verify-mfa
- * Handles MFA verification (Step 2 — OTP, issues real JWT).
- */
-router.post('/verify-mfa', validate(verifyMfaSchema), authController.verifyMfa);
 
 /**
  * GET /api/auth/me

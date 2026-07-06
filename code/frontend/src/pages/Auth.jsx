@@ -5,12 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { login, signup, verifyMfa, resetPassword } = useAuth();
+  const { login, signup, resetPassword } = useAuth();
   const { t } = useTranslation();
 
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isMfaStep, setIsMfaStep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -21,20 +20,13 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // MFA fields
-  const [tempToken, setTempToken] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-
   function clearForm() {
     setName('');
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setOtpCode('');
-    setTempToken('');
     setError('');
     setSuccess('');
-    setIsMfaStep(false);
   }
 
   async function handleSubmit(e) {
@@ -62,40 +54,12 @@ export default function Auth() {
     try {
       if (isRegister) {
         await signup(name.trim(), email, password);
-        navigate('/dashboard');
       } else {
-        const result = await login(email, password);
-        if (result.mfaRequired) {
-          setTempToken(result.tempToken);
-          setIsMfaStep(true);
-          setSuccess(t('auth.otpSent'));
-        } else {
-          navigate('/dashboard');
-        }
+        await login(email, password);
       }
-    } catch (err) {
-      setError(err.message || t('auth.connectionError'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleMfaVerify(e) {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (otpCode.length !== 6) {
-      setError(t('auth.otpLength'));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await verifyMfa(tempToken, otpCode);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || t('auth.otpInvalid'));
+      setError(err.message || t('auth.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -120,64 +84,6 @@ export default function Auth() {
     } finally {
       setLoading(false);
     }
-  }
-
-  // ── MFA Verification View ──
-  if (isMfaStep) {
-    return (
-      <div className="auth-page">
-        <div className="auth-container glass-panel">
-          <div className="auth-header">
-            <div className="auth-logo">ITQAN AI</div>
-            <p className="auth-subtitle">{t('auth.mfaTitle')}</p>
-          </div>
-
-          {error && <div className="auth-alert auth-alert-error">{error}</div>}
-          {success && <div className="auth-alert auth-alert-success">{success}</div>}
-
-          <div style={{ textAlign: 'center', marginBottom: '16px', color: 'var(--text-muted)' }}>
-            <p>{t('auth.mfaDescription')}</p>
-          </div>
-
-          <form onSubmit={handleMfaVerify}>
-            <div className="auth-field">
-              <label htmlFor="mfa-otp">{t('auth.otpLabel')}</label>
-              <input
-                id="mfa-otp"
-                type="text"
-                className="input-field"
-                required
-                placeholder="000000"
-                maxLength={6}
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                disabled={loading}
-                style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px', fontWeight: 'bold' }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary auth-submit"
-              disabled={loading || otpCode.length !== 6}
-            >
-              {loading ? <span className="auth-spinner" /> : t('auth.verifyCode')}
-            </button>
-          </form>
-
-          <div className="auth-footer">
-            <p>
-              <span
-                className="auth-link"
-                onClick={() => { clearForm(); }}
-              >
-                {t('auth.backToLogin')}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   // ── Forgot Password View ──

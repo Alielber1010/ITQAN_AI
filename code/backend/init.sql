@@ -78,21 +78,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
     details     TEXT
 );
 
--- 8. MFA Tokens (for multi-factor authentication)
-CREATE TABLE IF NOT EXISTS mfa_tokens (
-    id          VARCHAR(128) PRIMARY KEY DEFAULT gen_random_uuid()::text,
-    user_id     VARCHAR(128) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    otp_code    VARCHAR(6) NOT NULL,
-    expires_at  TIMESTAMP NOT NULL,
-    used        BOOLEAN DEFAULT FALSE,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_financial_profiles_user ON financial_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_financial_goals_user    ON financial_goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_advice_user             ON advice(user_id);
 CREATE INDEX IF NOT EXISTS idx_system_logs_user        ON system_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_system_logs_timestamp   ON system_logs(timestamp);
-CREATE INDEX IF NOT EXISTS idx_mfa_tokens_user         ON mfa_tokens(user_id);
-CREATE INDEX IF NOT EXISTS idx_mfa_tokens_expires      ON mfa_tokens(expires_at);

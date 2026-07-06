@@ -15,12 +15,6 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-const verifyMfaSchema = Joi.object({
-  tempToken: Joi.string().required(),
-  otpCode: Joi.string().length(6).pattern(/^\d+$/).required()
-    .messages({ 'string.length': 'OTP must be exactly 6 digits.', 'string.pattern.base': 'OTP must contain only digits.' }),
-});
-
 // ── Profile Schemas ───────────────────────────────────────────
 const profileSchema = Joi.object({
   userId: Joi.string().required(),
@@ -83,7 +77,6 @@ const userRoleSchema = Joi.object({
 module.exports = {
   registerSchema,
   loginSchema,
-  verifyMfaSchema,
   profileSchema,
   goalCreateSchema,
   chatSchema,

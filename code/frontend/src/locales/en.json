@@ -41,14 +41,7 @@
     "resetFailed": "Failed to request password reset.",
     "rememberPassword": "Remember your password?",
     "requestReset": "Request Reset",
-    "backToLogin": "Back to Login",
-    "mfaTitle": "Two-Factor Authentication",
-    "mfaDescription": "A verification code has been sent to your email. Please enter it below to complete your login.",
-    "otpLabel": "Verification Code",
-    "otpSent": "Verification code sent! Check your email (or server console for demo).",
-    "otpLength": "Please enter a 6-digit code.",
-    "otpInvalid": "Invalid or expired verification code.",
-    "verifyCode": "Verify Code"
+    "backToLogin": "Back to Login"
   },
   "dashboard": {
     "title": "Financial Dashboard",

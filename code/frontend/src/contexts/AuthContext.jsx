@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * Register — no MFA on signup, user is logged in immediately
+   * Register — user is logged in immediately
    */
   async function signup(name, email, password) {
     const res = await fetch(`${API_URL}/register`, {
@@ -66,8 +66,7 @@ export function AuthProvider({ children }) {
   }
 
   /**
-   * Login Step 1 — Send credentials, receive MFA challenge
-   * Returns { mfaRequired, tempToken } so the UI can show the OTP input
+   * Login — validates credentials and logs the user in directly.
    */
   async function login(email, password) {
     const res = await fetch(`${API_URL}/login`, {
@@ -77,29 +76,6 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message || data.errors?.join(', ') || 'Login failed');
-
-    // MFA flow: return temp token so UI can proceed to OTP step
-    if (data.mfaRequired) {
-      return { mfaRequired: true, tempToken: data.tempToken };
-    }
-
-    // Fallback: direct login (shouldn't happen but just in case)
-    localStorage.setItem('itqan_token', data.token);
-    setUser(data.user);
-    return { mfaRequired: false };
-  }
-
-  /**
-   * Login Step 2 — Verify MFA OTP code
-   */
-  async function verifyMfa(tempToken, otpCode) {
-    const res = await fetch(`${API_URL}/verify-mfa`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tempToken, otpCode }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || data.errors?.join(', ') || 'MFA verification failed');
 
     localStorage.setItem('itqan_token', data.token);
     setUser(data.user);
@@ -121,7 +97,6 @@ export function AuthProvider({ children }) {
     loading,
     signup,
     login,
-    verifyMfa,
     resetPassword,
     logout,
   };
