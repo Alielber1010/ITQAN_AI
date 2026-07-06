@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.9",
+    "@huggingface/transformers": "^3.5.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",

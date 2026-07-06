@@ -6,9 +6,15 @@
  * actual Shariah PDF content.
  */
 const path = require('path');
+const os = require('os');
 const fs = require('fs');
+const { env: transformersEnv } = require('@huggingface/transformers');
 const { DefaultEmbeddingFunction } = require('@chroma-core/default-embed');
 const db = require('./db');
+
+// Vercel's serverless filesystem is read-only outside /tmp, but transformers.js
+// defaults to caching the downloaded model under node_modules. Redirect it.
+transformersEnv.cacheDir = path.join(os.tmpdir(), 'transformers-cache');
 
 let embedder = null;
 
