@@ -48,7 +48,7 @@ export default function ZakatCalculator() {
       <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>{t('zakat.title')}</h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>{t('zakat.subtitle')}</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '32px' }}>
+      <div className="zakat-grid">
         <div className="glass-panel">
           <form onSubmit={calculateZakat}>
             <div style={{ marginBottom: '16px' }}>

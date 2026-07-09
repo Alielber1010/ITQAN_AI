@@ -13,7 +13,8 @@
     "zakat": "Zakat Calculator",
     "compliance": "Compliance Checker",
     "education": "Financial Literacy",
-    "admin": "Admin Portal"
+    "admin": "Admin Portal",
+    "more": "More"
   },
   "auth": {
     "subtitle": "Islamic Finance Advisor",

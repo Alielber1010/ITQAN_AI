@@ -92,7 +92,9 @@ export default function Auth() {
       <div className="auth-page">
         <div className="auth-container glass-panel">
           <div className="auth-header">
-            <div className="auth-logo">ITQAN AI</div>
+            <div className="auth-logo">
+              <img src="/logo-itqan.png" alt="ITQAN AI" />
+            </div>
             <p className="auth-subtitle">{t('auth.resetTitle')}</p>
           </div>
 
@@ -145,7 +147,9 @@ export default function Auth() {
       <div className="auth-container glass-panel">
         {/* Header */}
         <div className="auth-header">
-          <div className="auth-logo">ITQAN AI</div>
+          <div className="auth-logo">
+            <img src="/logo-itqan.png" alt="ITQAN AI" />
+          </div>
           <p className="auth-subtitle">{t('auth.subtitle')}</p>
         </div>
 

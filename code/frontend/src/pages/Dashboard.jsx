@@ -82,7 +82,7 @@ export default function Dashboard() {
         data: profile 
           ? [Number(profile.savings), Number(profile.assets), Number(profile.liabilities)]
           : [0, 0, 0],
-        backgroundColor: ['#10B981', '#0E7490', '#E11D48'],
+        backgroundColor: ['#1E8F6F', '#CAA33C', '#B23A48'],
         borderWidth: 0,
       },
     ],
@@ -91,7 +91,7 @@ export default function Dashboard() {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom', labels: { color: '#64748B' } } }
+    plugins: { legend: { position: 'bottom', labels: { color: '#8A7660' } } }
   };
 
   const incomeVsExpense = {
@@ -100,12 +100,12 @@ export default function Dashboard() {
       {
         label: t('dashboard.income'),
         data: [5000, 5200, 5100, 5800, 6000, 6200],
-        backgroundColor: '#0E7490',
+        backgroundColor: '#CAA33C',
       },
       {
         label: t('dashboard.liabilities'),
         data: [2000, 2100, 1900, 2400, 2100, 2300],
-        backgroundColor: '#E11D48',
+        backgroundColor: '#B23A48',
       }
     ]
   };
@@ -134,7 +134,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="glass-panel" style={{ borderLeft: '4px solid #F59E0B' }}>
+        <div className="glass-panel" style={{ borderLeft: '4px solid var(--secondary-color)' }}>
           <h3 style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{t('dashboard.goals')}</h3>
           <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '8px' }}>{goalsInfo.percent}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '4px' }}>{goalsInfo.text}</div>
@@ -142,7 +142,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts System */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px' }}>
+      <div className="dashboard-charts-grid">
         <div className="glass-panel" style={{ height: '350px', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ marginBottom: '16px' }}>{t('dashboard.overview')}</h3>
           <div style={{ flex: 1, position: 'relative' }}>
@@ -153,7 +153,7 @@ export default function Dashboard() {
         <div className="glass-panel" style={{ height: '350px', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ marginBottom: '16px' }}>{t('dashboard.overview')}</h3>
           <div style={{ flex: 1, position: 'relative' }}>
-            <Bar data={incomeVsExpense} options={{...chartOptions, plugins: { legend: { position: 'top', labels: { color: '#64748B' } } }}} />
+            <Bar data={incomeVsExpense} options={{...chartOptions, plugins: { legend: { position: 'top', labels: { color: '#8A7660' } } }}} />
           </div>
         </div>
       </div>

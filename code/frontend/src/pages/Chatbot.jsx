@@ -195,8 +195,7 @@ export default function Chatbot() {
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {messages.map((msg, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '70%',
+              <div className="chat-bubble" style={{
                 padding: '16px',
                 borderRadius: '16px',
                 lineHeight: '1.5',

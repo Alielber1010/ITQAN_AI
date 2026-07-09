@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
@@ -13,7 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import './i18n';
 import './index.css';
 
-function LanguageSwitcher() {
+function LanguageSwitcher({ className = "btn nav-link lang-switch-btn" }) {
   const { i18n, t } = useTranslation();
 
   const toggleLanguage = () => {
@@ -30,7 +30,7 @@ function LanguageSwitcher() {
 
   return (
     <button
-      className="btn nav-link lang-switch-btn"
+      className={className}
       style={{ width: '100%', textAlign: 'left', background: 'transparent', cursor: 'pointer' }}
       onClick={toggleLanguage}
       type="button"
@@ -40,10 +40,21 @@ function LanguageSwitcher() {
   );
 }
 
+const PRIMARY_TABS = [
+  { to: '/dashboard', icon: '🏠', labelKey: 'nav.dashboard' },
+  { to: '/chatbot', icon: '💬', labelKey: 'nav.chatbot' },
+  { to: '/goals', icon: '🎯', labelKey: 'nav.goals' },
+  { to: '/zakat', icon: '🕌', labelKey: 'nav.zakat' },
+];
+
+const MORE_PATHS = ['/profile', '/education', '/admin'];
+
 function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -54,10 +65,32 @@ function Layout({ children }) {
     }
   }
 
+  // Close the "More" sheet whenever the route changes
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [location.pathname]);
+
+  // Escape-to-close + lock body scroll while the sheet is open
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setMoreOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [moreOpen]);
+
+  const isMoreActive = MORE_PATHS.some(p => location.pathname.startsWith(p));
+
   return (
     <div className="layout-container">
-      <nav className="navbar">
-        <div className="navbar-brand">{t('app.title')}</div>
+      <nav className="navbar" aria-label="Primary">
+        <div className="navbar-brand">
+          <img src="/logo-itqan.png" alt={t('app.title')} className="navbar-brand-logo" />
+          <span className="navbar-brand-caption">{t('app.title')}</span>
+        </div>
         {user && (
           <div className="navbar-user">
             <span className="navbar-user-name">{user.displayName || user.name || user.email}</span>
@@ -83,9 +116,58 @@ function Layout({ children }) {
           </button>
         </div>
       </nav>
+
       <main className="main-content">
         {children}
       </main>
+
+      {/* Mobile bottom tab bar */}
+      <nav className="bottom-tabbar" aria-label="Primary mobile">
+        {PRIMARY_TABS.map(tab => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            className={({ isActive }) => isActive ? "bottom-tab active" : "bottom-tab"}
+          >
+            <span className="bottom-tab-icon" aria-hidden="true">{tab.icon}</span>
+            <span>{t(tab.labelKey)}</span>
+          </NavLink>
+        ))}
+        <button
+          type="button"
+          className={isMoreActive || moreOpen ? "bottom-tab bottom-tab-more active" : "bottom-tab bottom-tab-more"}
+          onClick={() => setMoreOpen(o => !o)}
+          aria-expanded={moreOpen}
+        >
+          <span className="bottom-tab-icon" aria-hidden="true">⋯</span>
+          <span>{t('nav.more')}</span>
+        </button>
+      </nav>
+
+      {moreOpen && (
+        <>
+          <div className="sheet-backdrop" onClick={() => setMoreOpen(false)} />
+          <div className="more-sheet" role="dialog" aria-label={t('nav.more')}>
+            <div className="more-sheet-handle" />
+            <NavLink to="/profile" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
+              👤 {t('nav.profile')}
+            </NavLink>
+            <NavLink to="/education" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
+              📚 {t('nav.education')}
+            </NavLink>
+            {user && user.userType === 'Admin' && (
+              <NavLink to="/admin" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
+                🛡️ {t('nav.admin')}
+              </NavLink>
+            )}
+            <div className="more-sheet-divider" />
+            <LanguageSwitcher className="more-sheet-item" />
+            <button type="button" className="more-sheet-item" onClick={handleLogout}>
+              🚪 {t('app.logout')}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

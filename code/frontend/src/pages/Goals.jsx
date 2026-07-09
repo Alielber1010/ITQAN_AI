@@ -124,14 +124,14 @@ export default function Goals() {
 
   const getStatusBadgeColor = (status) => {
     if (status === 'completed') return 'var(--success)';
-    if (status === 'paused') return '#F59E0B';
+    if (status === 'paused') return '#C97A3D';
     return 'var(--primary-color)';
   };
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', animation: 'authFadeIn 0.5s ease-out' }}>
-      <div style={{ marginBottom: '40px', background: 'linear-gradient(135deg, rgba(14, 116, 144, 0.1) 0%, rgba(14, 116, 144, 0) 100%)', padding: '32px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-        <h1 style={{ fontSize: '36px', marginBottom: '12px', background: 'linear-gradient(90deg, var(--primary-color), #38BDF8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+      <div style={{ marginBottom: '40px', background: 'linear-gradient(135deg, rgba(202, 163, 60, 0.14) 0%, rgba(202, 163, 60, 0) 100%)', padding: '32px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+        <h1 style={{ fontSize: '36px', marginBottom: '12px', background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {t('goals.title')}
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '16px', maxWidth: '600px', lineHeight: '1.6' }}>
@@ -139,10 +139,10 @@ export default function Goals() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '40px', alignItems: 'start' }}>
-        
+      <div className="goals-grid">
+
         {/* Goal Form */}
-        <div className="glass-panel" style={{ position: 'sticky', top: '40px' }}>
+        <div className="glass-panel goals-form-panel">
           <h2 style={{ fontSize: '20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ display: 'inline-block', width: '8px', height: '24px', background: 'var(--primary-color)', borderRadius: '4px' }}></span>
             {formData.goalId ? t('goals.edit') : t('goals.addGoal')}
@@ -163,7 +163,7 @@ export default function Goals() {
               />
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+            <div className="form-row-2" style={{ marginBottom: '20px' }}>
               <div>
                 <label style={{ fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>{t('goals.targetAmount')}</label>
                 <input 
@@ -337,7 +337,7 @@ export default function Goals() {
                         bottom: 0,
                         [isRtl ? 'right' : 'left']: 0,
                         width: `${progress}%`, 
-                        background: `linear-gradient(${isRtl ? '-90deg' : '90deg'}, ${badgeColor}, ${isCompleted ? '#34D399' : '#38BDF8'})`, 
+                        background: `linear-gradient(${isRtl ? '-90deg' : '90deg'}, ${badgeColor}, ${isCompleted ? '#1E8F6F' : 'var(--secondary-color)'})`,
                         borderRadius: '6px',
                         transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
                       }}>

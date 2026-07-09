@@ -139,22 +139,22 @@ export default function AdminDashboard() {
     <div style={{ maxWidth: '1200px', margin: '0 auto', animation: 'authFadeIn 0.5s ease-out' }}>
       
       {/* Header section */}
-      <div style={{ 
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px',
-        padding: '32px', background: 'linear-gradient(135deg, #0F172A 0%, rgba(15, 23, 42, 0.8) 100%)',
+      <div className="admin-hero" style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px',
+        padding: '32px', background: 'linear-gradient(135deg, #17130D 0%, rgba(15, 92, 86, 0.85) 100%)',
         borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <span style={{ padding: '4px 8px', background: 'rgba(225, 29, 72, 0.2)', color: '#FDA4AF', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', borderRadius: '4px', letterSpacing: '1px' }}>System Admin</span>
-            <span style={{ color: '#94A3B8', fontSize: '14px' }}>ITQAN Control Center</span>
+            <span style={{ color: '#B8A588', fontSize: '14px' }}>ITQAN Control Center</span>
           </div>
-          <h1 style={{ fontSize: '32px', color: '#F8FAFC' }}>{t('admin.title')}</h1>
+          <h1 style={{ fontSize: '32px', color: '#F3E7D0' }}>{t('admin.title')}</h1>
         </div>
         <div style={{ textAlign: isRtl ? 'left' : 'right' }}>
-          <div style={{ color: '#94A3B8', fontSize: '12px', marginBottom: '4px' }}>System Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34D399', fontWeight: 'bold' }}>
-            <div style={{ width: '8px', height: '8px', background: '#34D399', borderRadius: '50%', boxShadow: '0 0 10px #34D399' }}></div>
+          <div style={{ color: '#B8A588', fontSize: '12px', marginBottom: '4px' }}>System Status</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1E8F6F', fontWeight: 'bold' }}>
+            <div style={{ width: '8px', height: '8px', background: '#1E8F6F', borderRadius: '50%', boxShadow: '0 0 10px #1E8F6F' }}></div>
             All Systems Operational
           </div>
         </div>
@@ -172,15 +172,15 @@ export default function AdminDashboard() {
       )}
 
       {/* Modern Tabs */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', borderBottom: '2px solid var(--glass-border)', paddingBottom: '0' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', borderBottom: '2px solid var(--glass-border)', paddingBottom: '0', overflowX: 'auto' }}>
         {['users', 'rules', 'logs'].map(tab => (
-          <button 
+          <button
             key={tab}
             onClick={() => { setActiveTab(tab); setStatusMsg(null); }}
-            style={{ 
-              padding: '16px 24px', 
-              background: 'transparent', 
-              border: 'none', 
+            style={{
+              padding: '16px 24px',
+              background: 'transparent',
+              border: 'none',
               borderBottom: activeTab === tab ? '3px solid var(--primary-color)' : '3px solid transparent',
               color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-muted)',
               fontSize: '15px',
@@ -189,7 +189,9 @@ export default function AdminDashboard() {
               letterSpacing: '0.5px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              marginBottom: '-2px'
+              marginBottom: '-2px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             {tab === 'users' ? `👥 ${t('admin.users')}` : tab === 'rules' ? `⚖️ ${t('admin.rules')}` : `📡 ${t('admin.logs')}`}
@@ -207,55 +209,57 @@ export default function AdminDashboard() {
           {/* USER MANAGEMENT */}
           {activeTab === 'users' && (
             <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: isRtl ? 'right' : 'left' }}>
-                <thead style={{ background: 'rgba(0,0,0,0.02)' }}>
-                  <tr>
-                    <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Identity</th>
-                    <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Contact</th>
-                    <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Clearance</th>
-                    <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Registration</th>
-                    <th style={{ padding: '20px', textAlign: isRtl ? 'left' : 'right', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.user_id} style={{ borderTop: '1px solid var(--glass-border)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.01)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ padding: '20px', fontWeight: '600' }}>{u.name}</td>
-                      <td style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '14px' }}>{u.email}</td>
-                      <td style={{ padding: '20px' }}>
-                        <span style={{ 
-                          fontSize: '11px', fontWeight: '800', padding: '6px 12px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase',
-                          background: u.user_type === 'Admin' ? 'rgba(225, 29, 72, 0.1)' : 'rgba(14, 116, 144, 0.1)', 
-                          color: u.user_type === 'Admin' ? 'var(--danger)' : 'var(--primary-color)'
-                        }}>
-                          {u.user_type}
-                        </span>
-                      </td>
-                      <td style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '14px' }}>{new Date(u.created_date).toLocaleDateString()}</td>
-                      <td style={{ padding: '20px', textAlign: isRtl ? 'left' : 'right' }}>
-                        <button 
-                          onClick={() => handleRoleChange(u.user_id, u.user_type)} 
-                          style={{ 
-                            padding: '8px 16px', fontSize: '12px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer',
-                            background: 'var(--surface)', border: '1px solid var(--glass-border)', color: 'var(--text-main)',
-                            opacity: u.user_id === user.uid ? 0.5 : 1
-                          }}
-                          disabled={u.user_id === user.uid}
-                        >
-                          {t('admin.manageRole')}
-                        </button>
-                      </td>
+              <div className="table-scroll">
+                <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: isRtl ? 'right' : 'left' }}>
+                  <thead style={{ background: 'rgba(0,0,0,0.02)' }}>
+                    <tr>
+                      <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Identity</th>
+                      <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Contact</th>
+                      <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Clearance</th>
+                      <th style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Registration</th>
+                      <th style={{ padding: '20px', textAlign: isRtl ? 'left' : 'right', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {users.map(u => (
+                      <tr key={u.user_id} style={{ borderTop: '1px solid var(--glass-border)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.01)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                        <td data-label="Identity" style={{ padding: '20px', fontWeight: '600' }}>{u.name}</td>
+                        <td data-label="Contact" style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '14px' }}>{u.email}</td>
+                        <td data-label="Clearance" style={{ padding: '20px' }}>
+                          <span style={{
+                            fontSize: '11px', fontWeight: '800', padding: '6px 12px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase',
+                            background: u.user_type === 'Admin' ? 'rgba(225, 29, 72, 0.1)' : 'var(--primary-light)',
+                            color: u.user_type === 'Admin' ? 'var(--danger)' : 'var(--primary-color)'
+                          }}>
+                            {u.user_type}
+                          </span>
+                        </td>
+                        <td data-label="Registration" style={{ padding: '20px', color: 'var(--text-muted)', fontSize: '14px' }}>{new Date(u.created_date).toLocaleDateString()}</td>
+                        <td data-label="Actions" style={{ padding: '20px', textAlign: isRtl ? 'left' : 'right' }}>
+                          <button
+                            onClick={() => handleRoleChange(u.user_id, u.user_type)}
+                            style={{
+                              padding: '8px 16px', fontSize: '12px', fontWeight: '600', borderRadius: '8px', cursor: 'pointer',
+                              background: 'var(--surface)', border: '1px solid var(--glass-border)', color: 'var(--text-main)',
+                              opacity: u.user_id === user.uid ? 0.5 : 1
+                            }}
+                            disabled={u.user_id === user.uid}
+                          >
+                            {t('admin.manageRole')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
           {/* RULES ENGINE */}
           {activeTab === 'rules' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '32px', alignItems: 'start' }}>
-              <div className="glass-panel" style={{ position: 'sticky', top: '40px' }}>
+            <div className="admin-rules-grid">
+              <div className="glass-panel admin-rules-form-panel">
                 <h2 style={{ fontSize: '20px', marginBottom: '24px' }}>{ruleForm.ruleId ? t('admin.editRule') : t('admin.addRule')}</h2>
                 <form onSubmit={handleRuleSubmit}>
                   <div style={{ marginBottom: '20px' }}>
@@ -290,7 +294,7 @@ export default function AdminDashboard() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {rules.map(rule => (
-                  <div key={rule.rule_id} className="glass-panel" style={{ padding: '24px', borderLeft: !isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#F59E0B' : 'var(--primary-color)'}` : 'none', borderRight: isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#F59E0B' : 'var(--primary-color)'}` : 'none' }}>
+                  <div key={rule.rule_id} className="glass-panel" style={{ padding: '24px', borderLeft: !isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#C97A3D' : 'var(--primary-color)'}` : 'none', borderRight: isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#C97A3D' : 'var(--primary-color)'}` : 'none' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                       <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', letterSpacing: '0.5px' }}>
                         {rule.category.replace('-', ' ')}
@@ -314,25 +318,25 @@ export default function AdminDashboard() {
 
           {/* AUDIT LOGS */}
           {activeTab === 'logs' && (
-            <div className="glass-panel" style={{ padding: '0', background: '#0F172A', border: '1px solid #1E293B', overflow: 'hidden' }}>
-              <div style={{ padding: '16px 24px', borderBottom: '1px solid #1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#94A3B8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Terminal Output Feed</span>
+            <div className="glass-panel" style={{ padding: '0', background: '#17130D', border: '1px solid rgba(202, 163, 60, 0.18)', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(202, 163, 60, 0.18)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#B8A588', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Terminal Output Feed</span>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444' }}></div>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F59E0B' }}></div>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }}></div>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#C97A3D' }}></div>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#1E8F6F' }}></div>
                 </div>
               </div>
               <div style={{ padding: '24px', maxHeight: '600px', overflowY: 'auto', fontFamily: '"Fira Code", monospace', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '12px', direction: 'ltr', textAlign: 'left' }}>
                 {logs.map(log => (
-                  <div key={log.log_id} style={{ color: '#E2E8F0', display: 'flex', alignItems: 'flex-start', gap: '16px', lineHeight: '1.5' }}>
-                    <div style={{ color: '#64748B', whiteSpace: 'nowrap' }}>[{new Date(log.timestamp).toISOString().replace('T', ' ').substring(0, 19)}]</div>
-                    <div style={{ color: '#38BDF8', width: '140px', flexShrink: 0, fontWeight: 'bold' }}>{log.action_type}</div>
+                  <div key={log.log_id} style={{ color: '#F3E7D0', display: 'flex', alignItems: 'flex-start', gap: '16px', lineHeight: '1.5' }}>
+                    <div style={{ color: '#8A7660', whiteSpace: 'nowrap' }}>[{new Date(log.timestamp).toISOString().replace('T', ' ').substring(0, 19)}]</div>
+                    <div style={{ color: '#CAA33C', width: '140px', flexShrink: 0, fontWeight: 'bold' }}>{log.action_type}</div>
                     <div style={{ flex: 1 }}>{log.details}</div>
-                    <div style={{ color: '#94A3B8', fontSize: '11px', whiteSpace: 'nowrap' }}>{log.user_email || 'System'}</div>
+                    <div style={{ color: '#B8A588', fontSize: '11px', whiteSpace: 'nowrap' }}>{log.user_email || 'System'}</div>
                   </div>
                 ))}
-                {logs.length === 0 && <div style={{ color: '#64748B' }}>&gt; Waiting for system events...</div>}
+                {logs.length === 0 && <div style={{ color: '#8A7660' }}>&gt; Waiting for system events...</div>}
               </div>
             </div>
           )}

@@ -103,7 +103,7 @@ export default function Education() {
         textAlign: 'center'
       }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-        <h1 style={{ fontSize: '36px', marginBottom: '16px', background: 'linear-gradient(90deg, var(--primary-color), #38BDF8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <h1 style={{ fontSize: '36px', marginBottom: '16px', background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {t('education.title')}
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '16px', maxWidth: '700px', margin: '0 auto', lineHeight: '1.6' }}>
@@ -111,10 +111,10 @@ export default function Education() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '40px', alignItems: 'start' }}>
-        
+      <div className="education-grid">
+
         {/* Navigation Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'sticky', top: '40px' }}>
+        <div className="education-nav-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', paddingLeft: isRtl ? '0' : '12px', paddingRight: isRtl ? '12px' : '0' }}>
             {t('education.topics')}
           </h3>
