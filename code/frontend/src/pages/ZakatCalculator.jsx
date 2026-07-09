@@ -45,8 +45,10 @@ export default function ZakatCalculator() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>{t('zakat.title')}</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>{t('zakat.subtitle')}</p>
+      <div className="page-header">
+        <h1 className="page-header-title">{t('zakat.title')}</h1>
+        <p className="page-header-subtitle">{t('zakat.subtitle')}</p>
+      </div>
 
       <div className="zakat-grid">
         <div className="glass-panel">

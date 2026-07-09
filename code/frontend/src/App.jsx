@@ -10,10 +10,12 @@ import ZakatCalculator from './pages/ZakatCalculator';
 import Goals from './pages/Goals';
 import Education from './pages/Education';
 import AdminDashboard from './pages/AdminDashboard';
+import Contact from './pages/Contact';
+import { HomeIcon, UserIcon, TargetIcon, ChatIcon, CrescentIcon, BookIcon, MailIcon, ShieldIcon, LogOutIcon, GlobeIcon, MenuIcon } from './components/Icons';
 import './i18n';
 import './index.css';
 
-function LanguageSwitcher({ className = "btn nav-link lang-switch-btn" }) {
+function LanguageSwitcher({ className = "btn nav-link lang-switch-btn", compact = false }) {
   const { i18n, t } = useTranslation();
 
   const toggleLanguage = () => {
@@ -31,30 +33,33 @@ function LanguageSwitcher({ className = "btn nav-link lang-switch-btn" }) {
   return (
     <button
       className={className}
-      style={{ width: '100%', textAlign: 'left', background: 'transparent', cursor: 'pointer' }}
+      style={compact
+        ? { background: 'transparent', cursor: 'pointer' }
+        : { width: '100%', textAlign: 'left', background: 'transparent', cursor: 'pointer' }}
       onClick={toggleLanguage}
       type="button"
     >
-      🌐 {t('app.language')}
+      <GlobeIcon size={16} /> {t('app.language')}
     </button>
   );
 }
 
-const PRIMARY_TABS = [
-  { to: '/dashboard', icon: '🏠', labelKey: 'nav.dashboard' },
-  { to: '/chatbot', icon: '💬', labelKey: 'nav.chatbot' },
-  { to: '/goals', icon: '🎯', labelKey: 'nav.goals' },
-  { to: '/zakat', icon: '🕌', labelKey: 'nav.zakat' },
+const TOPBAR_LINKS = [
+  { to: '/dashboard', icon: HomeIcon, labelKey: 'nav.dashboard' },
+  { to: '/profile', icon: UserIcon, labelKey: 'nav.profile' },
+  { to: '/goals', icon: TargetIcon, labelKey: 'nav.goals' },
+  { to: '/chatbot', icon: ChatIcon, labelKey: 'nav.chatbot' },
+  { to: '/zakat', icon: CrescentIcon, labelKey: 'nav.zakat' },
+  { to: '/education', icon: BookIcon, labelKey: 'nav.education' },
+  { to: '/contact', icon: MailIcon, labelKey: 'nav.contact' },
 ];
-
-const MORE_PATHS = ['/profile', '/education', '/admin'];
 
 function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -65,51 +70,65 @@ function Layout({ children }) {
     }
   }
 
-  // Close the "More" sheet whenever the route changes
+  // Close the mobile drawer whenever the route changes
   useEffect(() => {
-    setMoreOpen(false);
+    setDrawerOpen(false);
   }, [location.pathname]);
 
-  // Escape-to-close + lock body scroll while the sheet is open
+  // Escape-to-close + lock body scroll while the drawer is open
   useEffect(() => {
-    if (!moreOpen) return;
-    const onKeyDown = (e) => { if (e.key === 'Escape') setMoreOpen(false); };
+    if (!drawerOpen) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setDrawerOpen(false); };
     document.addEventListener('keydown', onKeyDown);
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = '';
     };
-  }, [moreOpen]);
+  }, [drawerOpen]);
 
-  const isMoreActive = MORE_PATHS.some(p => location.pathname.startsWith(p));
+  const navLinks = user && user.userType === 'Admin'
+    ? [...TOPBAR_LINKS, { to: '/admin', icon: ShieldIcon, labelKey: 'nav.admin' }]
+    : TOPBAR_LINKS;
 
   return (
     <div className="layout-container">
       <nav className="navbar" aria-label="Primary">
+        <button
+          type="button"
+          className="navbar-menu-btn"
+          onClick={() => setDrawerOpen(o => !o)}
+          aria-expanded={drawerOpen}
+          aria-label={t('nav.menu')}
+        >
+          <MenuIcon size={20} />
+        </button>
+
         <div className="navbar-brand">
           <img src="/logo-itqan.png" alt={t('app.title')} className="navbar-brand-logo" />
           <span className="navbar-brand-caption">{t('app.title')}</span>
         </div>
-        {user && (
-          <div className="navbar-user">
+
+        <div className="navbar-links">
+          {navLinks.map(link => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({isActive}) => isActive ? "nav-link active" : "nav-link"}
+            >
+              {t(link.labelKey)}
+            </NavLink>
+          ))}
+        </div>
+
+        <div className="navbar-actions">
+          {user && (
             <span className="navbar-user-name">{user.displayName || user.name || user.email}</span>
-          </div>
-        )}
-        <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.dashboard')}</NavLink>
-        <NavLink to="/profile" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.profile')}</NavLink>
-        <NavLink to="/goals" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.goals')}</NavLink>
-        <NavLink to="/chatbot" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.chatbot')}</NavLink>
-        <NavLink to="/zakat" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.zakat')}</NavLink>
-        <NavLink to="/education" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.education')}</NavLink>
-        {user && user.userType === 'Admin' && (
-          <NavLink to="/admin" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>{t('nav.admin')}</NavLink>
-        )}
-        <div style={{ marginTop: 'auto' }}>
-          <LanguageSwitcher />
+          )}
+          <LanguageSwitcher compact className="btn nav-link lang-switch-btn" />
           <button
             className="btn nav-link"
-            style={{width: '100%', textAlign: 'left', background: 'transparent'}}
+            style={{ background: 'transparent' }}
             onClick={handleLogout}
           >
             {t('app.logout')}
@@ -121,49 +140,32 @@ function Layout({ children }) {
         {children}
       </main>
 
-      {/* Mobile bottom tab bar */}
-      <nav className="bottom-tabbar" aria-label="Primary mobile">
-        {PRIMARY_TABS.map(tab => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            className={({ isActive }) => isActive ? "bottom-tab active" : "bottom-tab"}
-          >
-            <span className="bottom-tab-icon" aria-hidden="true">{tab.icon}</span>
-            <span>{t(tab.labelKey)}</span>
-          </NavLink>
-        ))}
-        <button
-          type="button"
-          className={isMoreActive || moreOpen ? "bottom-tab bottom-tab-more active" : "bottom-tab bottom-tab-more"}
-          onClick={() => setMoreOpen(o => !o)}
-          aria-expanded={moreOpen}
-        >
-          <span className="bottom-tab-icon" aria-hidden="true">⋯</span>
-          <span>{t('nav.more')}</span>
-        </button>
-      </nav>
-
-      {moreOpen && (
+      {/* Mobile slide-out drawer */}
+      {drawerOpen && (
         <>
-          <div className="sheet-backdrop" onClick={() => setMoreOpen(false)} />
-          <div className="more-sheet" role="dialog" aria-label={t('nav.more')}>
-            <div className="more-sheet-handle" />
-            <NavLink to="/profile" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
-              👤 {t('nav.profile')}
-            </NavLink>
-            <NavLink to="/education" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
-              📚 {t('nav.education')}
-            </NavLink>
-            {user && user.userType === 'Admin' && (
-              <NavLink to="/admin" className={({isActive}) => isActive ? "more-sheet-item active" : "more-sheet-item"}>
-                🛡️ {t('nav.admin')}
+          <div className="sheet-backdrop" onClick={() => setDrawerOpen(false)} />
+          <div className="nav-drawer" role="dialog" aria-label={t('nav.menu')}>
+            <div className="nav-drawer-brand">
+              <img src="/logo-itqan.png" alt={t('app.title')} className="navbar-brand-logo" />
+              <span className="navbar-brand-caption">{t('app.title')}</span>
+            </div>
+
+            {user && <div className="nav-drawer-user">{user.displayName || user.name || user.email}</div>}
+
+            {navLinks.map(link => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({isActive}) => isActive ? "nav-drawer-item active" : "nav-drawer-item"}
+              >
+                <link.icon size={18} aria-hidden="true" /> {t(link.labelKey)}
               </NavLink>
-            )}
-            <div className="more-sheet-divider" />
-            <LanguageSwitcher className="more-sheet-item" />
-            <button type="button" className="more-sheet-item" onClick={handleLogout}>
-              🚪 {t('app.logout')}
+            ))}
+
+            <div className="nav-drawer-divider" />
+            <LanguageSwitcher className="nav-drawer-item" />
+            <button type="button" className="nav-drawer-item" onClick={handleLogout}>
+              <LogOutIcon size={18} aria-hidden="true" /> {t('app.logout')}
             </button>
           </div>
         </>
@@ -186,6 +188,35 @@ function ProtectedRoute({ children }) {
 
   if (!user) return <Navigate to="/auth" />;
   return <Layout>{children}</Layout>;
+}
+
+function ContactRoute() {
+  const { user, loading } = useAuth();
+  const { t } = useTranslation();
+
+  if (loading) {
+    return (
+      <div className="auth-loading-screen">
+        <div className="auth-spinner-large" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (user) return <Layout><Contact /></Layout>;
+
+  return (
+    <div className="public-page">
+      <div className="public-page-header">
+        <NavLink to="/" className="public-page-brand">
+          <img src="/logo-itqan.png" alt={t('app.title')} className="navbar-brand-logo" />
+          <span className="navbar-brand-caption">{t('app.title')}</span>
+        </NavLink>
+        <NavLink to="/auth" className="btn btn-primary">{t('auth.login')}</NavLink>
+      </div>
+      <Contact />
+    </div>
+  );
 }
 
 function AuthRoute() {
@@ -218,6 +249,7 @@ function App() {
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
           <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/contact" element={<ContactRoute />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>

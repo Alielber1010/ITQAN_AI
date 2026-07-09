@@ -14,6 +14,7 @@
     "compliance": "Compliance Checker",
     "education": "Financial Literacy",
     "admin": "Admin Portal",
+    "contact": "For Business",
     "more": "More"
   },
   "auth": {
@@ -25,7 +26,6 @@
     "emailLabel": "Email Address",
     "password": "Password",
     "confirmPassword": "Confirm Password",
-    "forgotPassword": "Forgot password?",
     "signIn": "Sign In Securely",
     "createAccount": "Create Account",
     "alreadyHaveAccount": "Already have an account?",
@@ -35,14 +35,7 @@
     "nameRequired": "Name is required.",
     "passwordMinLength": "Password must be at least 6 characters.",
     "passwordsNoMatch": "Passwords do not match.",
-    "connectionError": "Unable to connect to the server. Please try again later.",
-    "resetTitle": "Reset Your Password",
-    "enterEmail": "Please enter your email address.",
-    "resetSubmitted": "Password reset request submitted.",
-    "resetFailed": "Failed to request password reset.",
-    "rememberPassword": "Remember your password?",
-    "requestReset": "Request Reset",
-    "backToLogin": "Back to Login"
+    "connectionError": "Unable to connect to the server. Please try again later."
   },
   "dashboard": {
     "title": "Financial Dashboard",
@@ -56,7 +49,9 @@
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity",
     "noProfile": "Please set up your financial profile to see your dashboard.",
-    "goToProfile": "Set Up Profile"
+    "goToProfile": "Set Up Profile",
+    "bgThemeParchment": "Parchment background",
+    "bgThemeDefault": "Default background"
   },
   "profile": {
     "title": "Financial Profile",
@@ -159,5 +154,22 @@
     "source": "Source Reference",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "contact": {
+    "heroTitle": "Bring ITQAN AI to Your Business",
+    "heroSubtitle": "White-label our Shariah-compliant AI financial advisor as a chatbot for your own customers.",
+    "offerTitle": "What we offer",
+    "benefit1": "A ready-to-deploy Islamic finance chatbot, branded for your business",
+    "benefit2": "Zakat calculation, Shariah compliance screening, and financial guidance built in",
+    "benefit3": "Available in English and Arabic out of the box",
+    "benefit4": "Integrates with your existing website or app",
+    "directEmailLabel": "Prefer email? Reach us directly at",
+    "formTitle": "Tell us about your business",
+    "company": "Company",
+    "name": "Your Name",
+    "message": "Message",
+    "messagePlaceholder": "Tell us about your business and how you'd like to use ITQAN AI...",
+    "send": "Send Message",
+    "sentMessage": "Thanks! Your email client should now be open with your message ready to send."
   }
 }

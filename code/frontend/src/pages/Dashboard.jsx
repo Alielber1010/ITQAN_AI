@@ -11,8 +11,11 @@ import {
   LinearScale,
   BarElement,
 } from 'chart.js';
+import { PaletteIcon } from '../components/Icons';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+
+const HOME_BG_STORAGE_KEY = 'itqan_home_bg_theme';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -20,8 +23,31 @@ export default function Dashboard() {
   const [profile, setProfile] = React.useState(null);
   const [goals, setGoals] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [bgTheme, setBgTheme] = React.useState(
+    () => localStorage.getItem(HOME_BG_STORAGE_KEY) || 'default'
+  );
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+  // Home page background theme: "default" follows the app's normal
+  // (system light/dark) look; "parchment" forces the flat #FBF3E8 look
+  // regardless of system preference. Only applied while this page is mounted.
+  React.useEffect(() => {
+    if (bgTheme === 'parchment') {
+      document.documentElement.setAttribute('data-home-bg', 'parchment');
+    } else {
+      document.documentElement.removeAttribute('data-home-bg');
+    }
+    return () => document.documentElement.removeAttribute('data-home-bg');
+  }, [bgTheme]);
+
+  function toggleBgTheme() {
+    setBgTheme(prev => {
+      const next = prev === 'parchment' ? 'default' : 'parchment';
+      localStorage.setItem(HOME_BG_STORAGE_KEY, next);
+      return next;
+    });
+  }
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -112,12 +138,23 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div>
-        <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>{t('dashboard.title')}</h1>
-        <p style={{ color: 'var(--text-muted)' }}>{t('dashboard.welcome')}! {user?.name || user?.email}</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>{t('dashboard.title')}</h1>
+          <p style={{ color: 'var(--text-muted)' }}>{t('dashboard.welcome')}! {user?.name || user?.email}</p>
+        </div>
+        <button
+          type="button"
+          className="btn home-bg-toggle"
+          onClick={toggleBgTheme}
+          aria-pressed={bgTheme === 'parchment'}
+        >
+          <PaletteIcon size={16} />
+          {bgTheme === 'parchment' ? t('dashboard.bgThemeDefault') : t('dashboard.bgThemeParchment')}
+        </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '24px' }}>
         
         {/* Top KPI Cards */}
         <div className="glass-panel" style={{ borderLeft: '4px solid var(--primary-color)' }}>

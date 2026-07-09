@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { TargetIcon, SparklesIcon, PencilIcon, TrashIcon } from '../components/Icons';
 
 export default function Goals() {
   const { user } = useAuth();
@@ -130,13 +131,9 @@ export default function Goals() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', animation: 'authFadeIn 0.5s ease-out' }}>
-      <div style={{ marginBottom: '40px', background: 'linear-gradient(135deg, rgba(202, 163, 60, 0.14) 0%, rgba(202, 163, 60, 0) 100%)', padding: '32px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-        <h1 style={{ fontSize: '36px', marginBottom: '12px', background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          {t('goals.title')}
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '16px', maxWidth: '600px', lineHeight: '1.6' }}>
-          {t('goals.subtitle')}
-        </p>
+      <div className="page-header">
+        <h1 className="page-header-title">{t('goals.title')}</h1>
+        <p className="page-header-subtitle">{t('goals.subtitle')}</p>
       </div>
 
       <div className="goals-grid">
@@ -213,9 +210,9 @@ export default function Goals() {
                   className="input-field"
                   style={{ fontSize: '16px', padding: '14px', borderRadius: '12px', cursor: 'pointer' }}
                 >
-                  <option value="active">🟢 {t('goals.active')}</option>
-                  <option value="completed">✨ {t('goals.completed')}</option>
-                  <option value="paused">⏸️ {t('goals.paused')}</option>
+                  <option value="active">{t('goals.active')}</option>
+                  <option value="completed">{t('goals.completed')}</option>
+                  <option value="paused">{t('goals.paused')}</option>
                 </select>
               </div>
             )}
@@ -263,7 +260,7 @@ export default function Goals() {
             </div>
           ) : goals.length === 0 ? (
             <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(14, 116, 144, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>🎯</div>
+              <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(14, 116, 144, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary-color)' }}><TargetIcon size={30} /></div>
               <h3 style={{ fontSize: '20px' }}>{t('goals.noGoals')}</h3>
             </div>
           ) : (
@@ -290,7 +287,7 @@ export default function Goals() {
                     <div>
                       <h3 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {goal.goal_type}
-                        {isCompleted && <span style={{ fontSize: '16px' }}>✨</span>}
+                        {isCompleted && <SparklesIcon size={16} style={{ color: 'var(--primary-color)' }} />}
                       </h3>
                       {goal.deadline && (
                         <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -347,19 +344,19 @@ export default function Goals() {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingLeft: isRtl ? '0' : '12px', paddingRight: isRtl ? '12px' : '0', paddingTop: '16px', borderTop: '1px dashed var(--glass-border)' }}>
-                    <button 
-                      onClick={() => handleEdit(goal)} 
-                      className="btn" 
-                      style={{ padding: '8px 16px', fontSize: '13px', fontWeight: '600', background: 'var(--surface)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', borderRadius: '8px' }}
+                    <button
+                      onClick={() => handleEdit(goal)}
+                      className="btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', background: 'var(--surface)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', borderRadius: '8px' }}
                     >
-                      ✏️ {t('goals.edit')}
+                      <PencilIcon size={14} /> {t('goals.edit')}
                     </button>
-                    <button 
-                      onClick={() => handleDelete(goal.goal_id)} 
-                      className="btn" 
-                      style={{ padding: '8px 16px', fontSize: '13px', fontWeight: '600', background: 'rgba(225, 29, 72, 0.05)', border: '1px solid rgba(225, 29, 72, 0.1)', color: 'var(--danger)', borderRadius: '8px' }}
+                    <button
+                      onClick={() => handleDelete(goal.goal_id)}
+                      className="btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', background: 'rgba(225, 29, 72, 0.05)', border: '1px solid rgba(225, 29, 72, 0.1)', color: 'var(--danger)', borderRadius: '8px' }}
                     >
-                      🗑️ {t('goals.delete')}
+                      <TrashIcon size={14} /> {t('goals.delete')}
                     </button>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { UsersIcon, ScaleIcon, ActivityIcon, BanIcon, AlertTriangleIcon, BarChartIcon, HandCoinsIcon } from '../components/Icons';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -173,30 +174,37 @@ export default function AdminDashboard() {
 
       {/* Modern Tabs */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', borderBottom: '2px solid var(--glass-border)', paddingBottom: '0', overflowX: 'auto' }}>
-        {['users', 'rules', 'logs'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => { setActiveTab(tab); setStatusMsg(null); }}
-            style={{
-              padding: '16px 24px',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: activeTab === tab ? '3px solid var(--primary-color)' : '3px solid transparent',
-              color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-muted)',
-              fontSize: '15px',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              marginBottom: '-2px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
-          >
-            {tab === 'users' ? `👥 ${t('admin.users')}` : tab === 'rules' ? `⚖️ ${t('admin.rules')}` : `📡 ${t('admin.logs')}`}
-          </button>
-        ))}
+        {['users', 'rules', 'logs'].map(tab => {
+          const TabIcon = tab === 'users' ? UsersIcon : tab === 'rules' ? ScaleIcon : ActivityIcon;
+          return (
+            <button
+              key={tab}
+              onClick={() => { setActiveTab(tab); setStatusMsg(null); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '16px 24px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: activeTab === tab ? '3px solid var(--primary-color)' : '3px solid transparent',
+                color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-muted)',
+                fontSize: '15px',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                marginBottom: '-2px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              <TabIcon size={16} />
+              {tab === 'users' ? t('admin.users') : tab === 'rules' ? t('admin.rules') : t('admin.logs')}
+            </button>
+          );
+        })}
       </div>
 
       {loading ? (
@@ -265,10 +273,10 @@ export default function AdminDashboard() {
                   <div style={{ marginBottom: '20px' }}>
                     <label style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>{t('admin.category')}</label>
                     <select name="category" value={ruleForm.category} onChange={(e) => setRuleForm({...ruleForm, category: e.target.value})} className="input-field" style={{ fontSize: '15px', padding: '14px', borderRadius: '12px' }}>
-                      <option value="prohibited-sector">🚫 Prohibited Sector</option>
-                      <option value="doubtful-sector">⚠️ Doubtful Sector</option>
-                      <option value="financial-ratio">📊 Financial Ratio Limit</option>
-                      <option value="zakat">🤲 Zakat Parameter</option>
+                      <option value="prohibited-sector">Prohibited Sector</option>
+                      <option value="doubtful-sector">Doubtful Sector</option>
+                      <option value="financial-ratio">Financial Ratio Limit</option>
+                      <option value="zakat">Zakat Parameter</option>
                     </select>
                   </div>
                   <div style={{ marginBottom: '20px' }}>
@@ -293,10 +301,16 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {rules.map(rule => (
+                {rules.map(rule => {
+                  const CategoryIcon = rule.category.includes('prohibited') ? BanIcon
+                    : rule.category.includes('doubtful') ? AlertTriangleIcon
+                    : rule.category === 'zakat' ? HandCoinsIcon
+                    : BarChartIcon;
+                  return (
                   <div key={rule.rule_id} className="glass-panel" style={{ padding: '24px', borderLeft: !isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#C97A3D' : 'var(--primary-color)'}` : 'none', borderRight: isRtl ? `4px solid ${rule.category.includes('prohibited') ? 'var(--danger)' : rule.category.includes('doubtful') ? '#C97A3D' : 'var(--primary-color)'}` : 'none' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', letterSpacing: '0.5px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', letterSpacing: '0.5px' }}>
+                        <CategoryIcon size={13} />
                         {rule.category.replace('-', ' ')}
                       </span>
                       <div style={{ display: 'flex', gap: '12px' }}>
@@ -311,7 +325,8 @@ export default function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

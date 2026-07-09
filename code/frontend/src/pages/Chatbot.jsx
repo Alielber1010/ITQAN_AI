@@ -2,20 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
-
-// Inline SVGs to replace MUI Icons and fix Vite Rolldown build error
-const AddIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
-
-const ChatBubbleOutlineIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-  </svg>
-);
+import { PlusIcon, ChatIcon } from '../components/Icons';
 
 export default function Chatbot() {
   const { user } = useAuth();
@@ -151,89 +138,96 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="chat-layout">
-      {/* Sidebar for Sessions */}
-      <div className="glass-panel chat-sidebar">
-        <button 
-          onClick={createNewSession}
-          className="btn btn-primary" 
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}
-        >
-          <AddIcon /> {t('chatbot.newChat') || 'New Chat'}
-        </button>
-        
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {sessions.map(session => (
-            <div 
-              key={session.session_id}
-              onClick={() => setCurrentSessionId(session.session_id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                background: currentSessionId === session.session_id ? 'var(--primary-color)' : 'transparent',
-                color: currentSessionId === session.session_id ? 'white' : 'var(--text-main)',
-                transition: 'background 0.2s',
-              }}
-              className={currentSessionId !== session.session_id ? "hover-surface" : ""}
-            >
-              <ChatBubbleOutlineIcon />
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px' }}>
-                {session.title}
-              </div>
-            </div>
-          ))}
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, gap: '0' }}>
+      <div className="page-header" style={{ marginBottom: '24px' }}>
+        <h1 className="page-header-title" style={{ fontSize: '28px' }}>{t('chatbot.title')}</h1>
+        <p className="page-header-subtitle">{t('chatbot.subtitle')}</p>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="glass-panel chat-main">
-        {/* Chat History View */}
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {messages.map((msg, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div className="chat-bubble" style={{
-                padding: '16px',
-                borderRadius: '16px',
-                lineHeight: '1.5',
-                whiteSpace: 'pre-wrap',
-                background: msg.sender === 'user' ? 'var(--primary-color)' : 'var(--surface)',
-                color: msg.sender === 'user' ? 'white' : 'var(--text-main)',
-                boxShadow: msg.sender === 'ai' ? 'var(--glass-shadow)' : 'none',
-                border: msg.sender === 'ai' ? '1px solid var(--glass-border)' : 'none',
-                borderBottomRightRadius: msg.sender === 'user' ? '4px' : '16px',
-                borderBottomLeftRadius: msg.sender === 'ai' ? '4px' : '16px',
-              }}>
-                <ReactMarkdown>{msg.text}</ReactMarkdown>
+      <div className="chat-layout">
+        {/* Sidebar for Sessions */}
+        <div className="glass-panel chat-sidebar">
+          <button
+            onClick={createNewSession}
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}
+          >
+            <PlusIcon size={18} /> {t('chatbot.newChat') || 'New Chat'}
+          </button>
+
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {sessions.map(session => (
+              <div
+                key={session.session_id}
+                onClick={() => setCurrentSessionId(session.session_id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: currentSessionId === session.session_id ? 'var(--primary-color)' : 'transparent',
+                  color: currentSessionId === session.session_id ? 'white' : 'var(--text-main)',
+                  transition: 'background 0.2s',
+                }}
+                className={currentSessionId !== session.session_id ? "hover-surface" : ""}
+              >
+                <ChatIcon size={18} />
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px' }}>
+                  {session.title}
+                </div>
               </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--surface)', color: 'var(--text-muted)' }}>
-                {t('chatbot.typing') || 'Typing...'}
-              </div>
-            </div>
-          )}
-          <div ref={endRef} />
+            ))}
+          </div>
         </div>
 
-        {/* Input box */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--glass-border)', background: 'var(--surface)' }}>
-          <form onSubmit={handleSend} style={{ display: 'flex', gap: '12px' }}>
-            <input 
-              type="text" 
-              className="input-field" 
-              style={{ margin: 0, flex: 1 }} 
-              placeholder={t('chatbot.placeholder') || 'Type a message...'}
-              value={input} 
-              onChange={e => setInput(e.target.value)}
-            />
-            <button className="btn btn-primary" type="submit" disabled={isLoading}>{t('chatbot.send') || 'Send'}</button>
-          </form>
+        {/* Main Chat Area */}
+        <div className="glass-panel chat-main">
+          {/* Chat History View */}
+          <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div className="chat-bubble" style={{
+                  padding: '16px',
+                  borderRadius: '16px',
+                  lineHeight: '1.5',
+                  whiteSpace: 'pre-wrap',
+                  background: msg.sender === 'user' ? 'var(--primary-color)' : 'var(--surface)',
+                  color: msg.sender === 'user' ? 'white' : 'var(--text-main)',
+                  boxShadow: msg.sender === 'ai' ? 'var(--glass-shadow)' : 'none',
+                  border: msg.sender === 'ai' ? '1px solid var(--glass-border)' : 'none',
+                  borderBottomRightRadius: msg.sender === 'user' ? '4px' : '16px',
+                  borderBottomLeftRadius: msg.sender === 'ai' ? '4px' : '16px',
+                }}>
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--surface)', color: 'var(--text-muted)' }}>
+                  {t('chatbot.typing') || 'Typing...'}
+                </div>
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
+
+          {/* Input box */}
+          <div style={{ padding: '16px 24px', borderTop: '1px solid var(--glass-border)', background: 'var(--surface)' }}>
+            <form onSubmit={handleSend} style={{ display: 'flex', gap: '12px' }}>
+              <input
+                type="text"
+                className="input-field"
+                style={{ margin: 0, flex: 1 }}
+                placeholder={t('chatbot.placeholder') || 'Type a message...'}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+              />
+              <button className="btn btn-primary" type="submit" disabled={isLoading}>{t('chatbot.send') || 'Send'}</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

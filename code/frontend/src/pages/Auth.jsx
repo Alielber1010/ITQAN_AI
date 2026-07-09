@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { login, signup, resetPassword } = useAuth();
+  const { login, signup } = useAuth();
   const { t } = useTranslation();
 
   const [isRegister, setIsRegister] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Form fields
   const [name, setName] = useState('');
@@ -26,13 +24,11 @@ export default function Auth() {
     setPassword('');
     setConfirmPassword('');
     setError('');
-    setSuccess('');
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     // Validation
     if (isRegister) {
@@ -65,83 +61,6 @@ export default function Auth() {
     }
   }
 
-  async function handleForgotPassword(e) {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!email) {
-      setError(t('auth.enterEmail'));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await resetPassword(email);
-      setSuccess(t('auth.resetSubmitted'));
-    } catch (err) {
-      setError(err.message || t('auth.resetFailed'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ── Forgot Password View ──
-  if (isForgotPassword) {
-    return (
-      <div className="auth-page">
-        <div className="auth-container glass-panel">
-          <div className="auth-header">
-            <div className="auth-logo">
-              <img src="/logo-itqan.png" alt="ITQAN AI" />
-            </div>
-            <p className="auth-subtitle">{t('auth.resetTitle')}</p>
-          </div>
-
-          {error && <div className="auth-alert auth-alert-error">{error}</div>}
-          {success && <div className="auth-alert auth-alert-success">{success}</div>}
-
-          <form onSubmit={handleForgotPassword}>
-            <div className="auth-field">
-              <label htmlFor="reset-email">{t('auth.emailLabel')}</label>
-              <input
-                id="reset-email"
-                type="email"
-                className="input-field"
-                required
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary auth-submit"
-              disabled={loading}
-            >
-              {loading ? <span className="auth-spinner" /> : t('auth.requestReset')}
-            </button>
-          </form>
-
-          <div className="auth-footer">
-            <p>
-              {t('auth.rememberPassword')}{' '}
-              <span
-                className="auth-link"
-                onClick={() => { setIsForgotPassword(false); clearForm(); }}
-              >
-                {t('auth.backToLogin')}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Main Login / Register View ──
   return (
     <div className="auth-page">
       <div className="auth-container glass-panel">
@@ -171,9 +90,8 @@ export default function Auth() {
           </button>
         </div>
 
-        {/* Error / Success Messages */}
+        {/* Error Message */}
         {error && <div className="auth-alert auth-alert-error">{error}</div>}
-        {success && <div className="auth-alert auth-alert-success">{success}</div>}
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
@@ -239,17 +157,6 @@ export default function Auth() {
             </div>
           )}
 
-          {!isRegister && (
-            <div className="auth-forgot">
-              <span
-                className="auth-link"
-                onClick={() => { setIsForgotPassword(true); clearForm(); }}
-              >
-                {t('auth.forgotPassword')}
-              </span>
-            </div>
-          )}
-
           <button
             type="submit"
             className="btn btn-primary auth-submit"
@@ -275,6 +182,9 @@ export default function Auth() {
             >
               {isRegister ? t('auth.loginHere') : t('auth.registerHere')}
             </span>
+          </p>
+          <p className="auth-business-link">
+            <Link to="/contact" className="auth-link">{t('contact.heroTitle')}</Link>
           </p>
         </div>
       </div>
