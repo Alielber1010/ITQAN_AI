@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { StopIcon, HandCoinsIcon, ScrollIcon, DiceIcon, BookIcon } from '../components/Icons';
 
 const ARTICLES = [
   {
     id: 'riba',
     title: 'Understanding Riba (Interest) & Debt',
     category: 'Core Principles',
-    icon: '🛑',
+    icon: StopIcon,
     summary: 'Riba refers to exploitative gains made in trade or business under Islamic law. It is most commonly identified with interest on loans.',
     content: `Riba literally means "increase," "addition," or "growth." In Islamic finance, it refers to unequal exchanges or charging interest on loans. Under Shariah law, money is not an asset that has intrinsic value; it is merely a medium of exchange. Therefore, lending money to make more money (interest) is strictly prohibited (Haram).
 
@@ -23,7 +24,7 @@ Instead of interest-bearing loans, Islamic finance utilizes:
     id: 'zakat',
     title: 'The Rules & Calculation of Zakat',
     category: 'Obligations',
-    icon: '🤲',
+    icon: HandCoinsIcon,
     summary: 'Zakat is the third pillar of Islam, requiring Muslims to give 2.5% of their qualifying wealth annually to support the needy.',
     content: `Zakat is a compulsory charitable payment required from every Muslim whose net wealth exceeds the Nisab threshold for a full lunar year (Hawl). 
 
@@ -39,7 +40,7 @@ Zakat purifies one's wealth and fosters social solidarity by directly supporting
     id: 'sukuk',
     title: 'Sukuk: Shariah-Compliant Investment',
     category: 'Investments',
-    icon: '📜',
+    icon: ScrollIcon,
     summary: 'Learn how Sukuk (Islamic bonds) represent fractional ownership of tangible assets rather than interest-bearing debt.',
     content: `Unlike conventional bonds which are interest-bearing debt securities, Sukuk are investment certificates representing ownership shares in tangible assets, services, or projects.
 
@@ -57,7 +58,7 @@ When you purchase a Sukuk, you are actually buying a partial ownership stake in 
     id: 'gharar',
     title: 'Gharar & Maysir (Uncertainty & Gambling)',
     category: 'Core Principles',
-    icon: '🎲',
+    icon: DiceIcon,
     summary: 'Shariah prohibits transactions involving excessive risk, ambiguity, or games of chance to ensure transparency and fairness.',
     content: `Islamic finance emphasizes transparency, fairness, and the protection of all parties in a contract. Therefore, two elements are strictly forbidden alongside Riba:
 
@@ -102,7 +103,7 @@ export default function Education() {
         boxShadow: 'var(--glass-shadow)',
         textAlign: 'center'
       }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: 'var(--primary-color)' }}><BookIcon size={44} /></div>
         <h1 style={{ fontSize: '36px', marginBottom: '16px', background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {t('education.title')}
         </h1>
@@ -152,8 +153,8 @@ export default function Education() {
                 {isActive && <div style={{ position: 'absolute', [isRtl ? 'right' : 'left']: 0, top: 0, bottom: 0, width: '4px', background: 'var(--primary-color)' }} />}
                 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ fontSize: '24px', background: isActive ? 'rgba(14, 116, 144, 0.1)' : 'var(--background)', padding: '10px', borderRadius: '12px' }}>
-                    {article.icon}
+                  <div style={{ display: 'flex', background: isActive ? 'rgba(14, 116, 144, 0.1)' : 'var(--background)', padding: '10px', borderRadius: '12px', color: isActive ? 'var(--primary-color)' : 'var(--text-muted)' }}>
+                    <article.icon size={20} />
                   </div>
                   <div>
                     <span style={{ 
@@ -188,7 +189,7 @@ export default function Education() {
         }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ fontSize: '32px' }}>{selectedArticle.icon}</div>
+            <div style={{ display: 'flex', color: 'var(--primary-color)' }}><selectedArticle.icon size={28} /></div>
             <span style={{ 
               fontSize: '13px', 
               fontWeight: '700', 

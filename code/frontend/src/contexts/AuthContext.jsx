@@ -82,11 +82,6 @@ export function AuthProvider({ children }) {
     return data.user;
   }
 
-  async function resetPassword(email) {
-    console.log("Password reset requested for:", email);
-    alert("Password reset is not implemented in this demo. Please contact support.");
-  }
-
   async function logout() {
     localStorage.removeItem('itqan_token');
     setUser(null);
@@ -97,7 +92,6 @@ export function AuthProvider({ children }) {
     loading,
     signup,
     login,
-    resetPassword,
     logout,
   };
 
