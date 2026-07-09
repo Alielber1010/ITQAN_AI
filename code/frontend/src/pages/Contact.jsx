@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CheckCircleIcon } from '../components/Icons';
 
 const CONTACT_EMAIL = 'partners@itqan.ai';
 
@@ -34,10 +35,10 @@ export default function Contact() {
         <div className="glass-panel contact-benefits">
           <h2>{t('contact.offerTitle')}</h2>
           <ul className="contact-benefits-list">
-            <li>{t('contact.benefit1')}</li>
-            <li>{t('contact.benefit2')}</li>
-            <li>{t('contact.benefit3')}</li>
-            <li>{t('contact.benefit4')}</li>
+            <li><CheckCircleIcon size={16} /> <span>{t('contact.benefit1')}</span></li>
+            <li><CheckCircleIcon size={16} /> <span>{t('contact.benefit2')}</span></li>
+            <li><CheckCircleIcon size={16} /> <span>{t('contact.benefit3')}</span></li>
+            <li><CheckCircleIcon size={16} /> <span>{t('contact.benefit4')}</span></li>
           </ul>
           <p className="contact-direct-email">
             {t('contact.directEmailLabel')}{' '}
